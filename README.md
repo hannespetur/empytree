@@ -5,7 +5,7 @@ Empytree is a cross-platform MP3 organizer. It is currently in development and n
 
   $ pip install eyed3
 
-## My Music Player of choice:
+## Music Player of choice on Ubuntu:
 Clementine
 
   $ sudo apt-get install clementine
