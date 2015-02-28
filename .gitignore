@@ -52,3 +52,12 @@ docs/_build/
 
 # PyBuilder
 target/
+
+# test mp3 folder
+Music/
+
+# ignore all mp3 files
+*.mp3
+
+# mac stuff
+.DS_Store
