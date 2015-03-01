@@ -53,6 +53,9 @@ docs/_build/
 # PyBuilder
 target/
 
+# ignore eyed3 source folder
+eyed3/
+
 # test mp3 folder
 Music/
 
