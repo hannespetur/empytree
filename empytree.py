@@ -11,11 +11,9 @@ import argparse			## Argument parser
 import warnings			##
 from pdb import set_trace
 
+
 ## External modules
 import eyed3	## eyed3 id3 tag module: http://eyed3.nicfit.net/
-
-## Constants
-FILES_MOVED = 0
 
 ## Remove all banned words from 
 def remove_banned_words(text):
@@ -31,6 +29,7 @@ def search_for_mp3s():
 
 
 def move_to_correct_path(root,file_name):
+	# Get global files
 	global FILES_MOVED
 
 	file_name_with_path = os.path.join(root,file_name)
@@ -69,6 +68,7 @@ def move_to_correct_path(root,file_name):
 ## The Main function
 if __name__ == '__main__':
 	global FILES_MOVED
+	FILES_MOVED = 0
 
 	# Create a argument parser
 	parser = argparse.ArgumentParser(description='Organize MP3 using ID3 tags.')
