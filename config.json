@@ -1,0 +1,28 @@
+{
+	"treeFormat":
+	[{
+		"level": 0,
+		"format": "%ARTIST",
+		"lowerCase": false,
+		"upperCase": false,
+		"allowSpaces": true
+	},{
+		"level": 1,
+		"format": "%ALBUM",
+		"lowerCase": false,
+		"upperCase": false,
+		"allowSpaces": true
+	},{
+		"level": 2,
+		"format": "%TRACK_NUM-%TRACK_TITLE.mp3",
+		"lowerCase": true,
+		"upperCase": false,
+		"allowSpaces": false
+	}],
+	"folders":
+	[{
+		"_comment": "Remeber to use full paths if you want to be able to use Empytree at any location.",
+		"input": "./test",
+		"output": "./Music"
+	}]
+}

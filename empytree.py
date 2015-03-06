@@ -1,15 +1,18 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
-import os				## Operation system interface
-import re 				## Regular expressium operations
-import sys  			## System-specific parameters and functions
-from glob import glob	## Unix style pathname pattern expansion
-import fnmatch			## Matches file names
-import shutil			##
-import argparse			## Argument parser
-import warnings			##
+import os						## Operation system interface
+import re 						## Regular expressium operations
+import sys  					## System-specific parameters and functions
+from glob import glob			## Unix style pathname pattern expansion
+import fnmatch					## Matches file names
+import shutil					##00
+import argparse					## Argument parser
+import warnings					##
+import json						## json
+from StringIO import StringIO
 from pdb import set_trace
+from pprint import pprint		## Just for testing purposes
 
 
 ## External modules
@@ -20,6 +23,7 @@ def remove_banned_words(text):
 	if text is None: 
 		return u''
 	return re.sub(r'(mongolduu\.com|mongolduu)[ -]*', '', text, flags=re.I).strip(' -')
+
 
 ## Search for mp3s in spevified input folder
 def search_for_mp3s():
@@ -45,24 +49,29 @@ def move_to_correct_path(root,file_name):
 	audiofile.tag.save()
 
 	## 
+	print levels
 	if audiofile.tag.artist:
+
 		new_path = os.path.join(new_path, audiofile.tag.artist)
 	else:
-		warnings.warn("No artist tag found in file: "+file_name, TagWarning)
+		warnings.warn("No artist tag found in file: "+file_name, Warning)
+
 	if audiofile.tag.album:
 		new_path = os.path.join(new_path, audiofile.tag.album)
+
 	if not os.path.exists(new_path):
 		os.makedirs(new_path)
 
-	if args.verbose:
-		print "New path is "+new_path
 	new_path = os.path.join(new_path.encode('utf8'), remove_banned_words(file_name))
-	if args.verbose:
-		print "New path is "+new_path
-	shutil.move(file_name_with_path, new_path)
-	if args.verbose:
-		print "Moved "+file_name+" to "+new_path
-		FILES_MOVED += 1
+
+	if args.test:
+		print file_name_with_path+" -> "+new_path
+	else:
+		shutil.move(file_name_with_path, new_path)
+		if args.verbose:
+			print "Moved "+file_name+" to "+new_path
+
+	FILES_MOVED += 1
 	return 0
 
 ## The Main function
@@ -74,15 +83,18 @@ if __name__ == '__main__':
 	parser = argparse.ArgumentParser(description='Organize MP3 using ID3 tags.')
 	## Hint: add_argument(name or flags...[, action][, nargs][, const][, default][, type][, choices][, required][, help][, metavar][, dest])
 	parser.add_argument('--verbose','-v',action='store_true')
-	parser.parse_args('--verbose'.split())
+	parser.add_argument('--test','-t',action='store_true')
+	parser.parse_args('--verbose --test'.split())
 
 	parser.add_argument('--input','-i',default='',help='The input directory (i.e. where the files you want )',action='store')
 	parser.add_argument('--output','-o',default='Music/',help='The input directory (i.e. where the files you want )',action='store')
+	parser.add_argument('--config','-c',default='config.json',help='Location of the config.json file',action='store')
 
 	# parser.add_argument('--max_depth','-d',default=10,help='The maximum depth Empytree will search for mp3s in your input folder.')
 
 	args = parser.parse_args()
 
+	# Format the args to a standard format
 	if not args.input.endswith('/'):
 		args.input += '/'
 	if not args.output.endswith('/'):
@@ -92,18 +104,31 @@ if __name__ == '__main__':
 	if args.output.startswith('./'):
 		args.output = args.output[2:]
 
+	try:
+		json_data = open(args.config,'r')
+		global data, levels
+		data = json.load(json_data)
+		levels = len(data["treeFormat"])
+		pprint(data)
+		json_data.close()
+		# set_trace()
+	except:
+		print "Could not use config: '"+args.config+"'. Either the config was not found or not valid. Using default options."
+
+	# Print out which arguments are defined as what
 	if args.verbose:
 		print "Empytree starting..."
 		print "========= Arguments ========="
 		print "Verbosity is on!"
+		print "Running on test mode?",args.test
 		print "Input directory is: "+args.input
 		print "Output directory is: "+args.output
 		print "============================="
 
 	for root,mp3file in search_for_mp3s():
-		if args.verbose:
-			print "Trying to move file "+mp3file
+		# if args.verbose:
+		# 	print "Trying to move file "+mp3file
 		move_to_correct_path(root,mp3file)
 
 	if args.verbose:
-		print "Total files moved:",FILES_MOVED
+		print "Empytree finished successfully! Total files moved:",FILES_MOVED
