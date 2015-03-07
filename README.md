@@ -6,25 +6,25 @@ Empytree is a cross-platform MP3 organizer.
 ## Prerequisites
 Uses a python module called [eyeD3](http://eyed3.nicfit.net/). You can install it on Ubuntu with the following:
 
-    $ sudo pip install --allow-unverified eyed3 eyed3
+    `$ sudo pip install --allow-unverified eyed3 eyed3`
 
 ## Music Player of choice on Ubuntu:
 Clementine
 
-    $ sudo apt-get install clementine
+    `$ sudo apt-get install clementine`
 
 ## Installation
 ### Basic setup
 * Step 1: Clone or download this repository to a directory of your choice.
 * Step 2: Change the configuration file, config.json, to your liking (more info below).
-* Step 3 (optional): Run Empytree in test mode
+* Step 3 (optional): Run empytree in test mode
 
-	$ python empytree.py --test
+    `$ python empytree.py --test```
 
-It will display which files empytree would hypothetically move and where it would move them. Repeat step 2 if you're unhappy with the results.
-* Step 4: Run Empytree!
+... It will display which files empytree would hypothetically move and where it would move them. Repeat step 2 if you're unhappy with the results.
+* Step 4: Run empytree!
 
-	$ python empytree.py
+    `$ python empytree.py`
 
 ### Configuration
 By default Empytree will read the configuration file named 'config.json' in the same directory. If you want to use a different configuration file you can pass in a '--config /path/to/config/config_name.json' argument. This escpecially useful if you want to use multiple configuration files.
@@ -39,8 +39,8 @@ Specifying folders in commandline will override these options. Remember to use f
 #### The 'TreeFormat' JSON object
 Here you choose the format of your directories. The first item in the array is your top level directory format, the next will be its subdirectory, and so on. The default settings will use the format:
 
-	$ARTIST/[$YEAR] $ALBUM/$DISK_NUM$TRACK_NUM-$ARTIST-$TRACK_TITLE.mp3
-	Savant/[2012] Vario/03-savant-living_ipod.mp3
+	`$ARTIST/[$YEAR] $ALBUM/$DISK_NUM$TRACK_NUM-$ARTIST-$TRACK_TITLE.mp3
+	Savant/[2012] Vario/03-savant-living_ipod.mp3`
 
 The properties are:
 * 'format' is the format of your directory/file. Some wildcards allowed (see below).
