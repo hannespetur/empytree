@@ -1,25 +1,11 @@
 {
-	"treeFormat":
+	"Folders":
 	[{
-		"_comment": "Create the top level directory format for your music folder. The next-to top
-					level directory will be the next item in the array and so on. The default
-					settings will use the format:
-								$ARTIST/[$YEAR] $ALBUM/$DISK_NUM$TRACK_NUM-$ARTIST-$TRACK_TITLE.mp3
-								Savant/[2012] Vario/03-savant-living_ipod.mp3
-					'format' is the format of your directory/file. Can use wildcards (see below).
-					'lowerCase' will force the folder/file to be all in lowercase.
-					'lowercase' will force the folder/file to be all in uppercase.
-					'replaceSpaces' will replace spaces with underscores.
-					
-					Available wildcards are:
-						$ARTIST
-						$ARTIST_OR_VA (uses VA as artist if artist and album artist isn't the same name.)
-						$ALBUM
-						$ALBUM_ARTIST
-						$DISK_NUM
-						$GENRE
-						$YEAR
-					",
+		"input": "./test",
+		"output": "./Music"
+	}],
+	"TreeFormat":
+	[{
 		"format": "$ARTIST",
 		"lowercase": false,
 		"uppercase": false,
@@ -34,12 +20,5 @@
 		"lowercase": true,
 		"uppercase": false,
 		"replaceSpaces": true
-	}],
-	"folders":
-	[{
-		"_comment": "Choose folders to use. Specifying folders in commandline will override these options.
-					 Remember to use full paths if you want to be able to run Empytree at any location.",
-		"input": "./test",
-		"output": "./Music"
 	}]
 }

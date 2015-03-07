@@ -104,10 +104,9 @@ if __name__ == '__main__':
 		json_data = open('config.json','r')
 		global data, levels
 		data = json.load(json_data)
-		levels = len(data["treeFormat"])
-		pprint(data)
+		levels = len(data["TreeFormat"])
+		# pprint(data)
 		json_data.close()
-		# set_trace()
 	except:
 		print "Could not use config: '"+args.config+"'. Either the config was not found or not valid. Using default options."
 
