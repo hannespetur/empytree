@@ -16,7 +16,7 @@
 		"uppercase": false,
 		"replaceSpaces": false
 	},{
-		"format": "$DISK_NUM$TRACK_NUM-$ARTIST-$TRACK_TITLE.mp3",
+		"format": "$DISK_NUM$TRACK_NUM-$ARTIST-$TRACK_TITLE",
 		"lowercase": true,
 		"uppercase": false,
 		"replaceSpaces": true

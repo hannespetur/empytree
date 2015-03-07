@@ -56,8 +56,9 @@ target/
 # ignore eyed3 source folder
 eyed3/
 
-# test mp3 folder
+# test folders
 Music/
+trash/
 
 # ignore all mp3 files
 *.mp3

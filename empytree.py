@@ -46,10 +46,16 @@ def move_to_correct_path(root,file_name):
 	audiofile.tag.save()
 
 	##
-	try:
-		print levels
-	except:
-		print "derp"
+	for level,L in enumerate(data["TreeFormat"]):
+		Lformat = L["format"]
+		Luc = L["uppercase"]
+		Llc = L["lowercase"]
+		Lrs = L["replaceSpaces"]
+		if level == (len(data["TreeFormat"])-1):
+			if not Lformat.endswith('.mp3'):
+				Lformat += '.mp3'
+		print Lformat, Luc, Llc, Lrs
+		# TODO: Replace wildcards and then organize...
 
 	if audiofile.tag.artist:
 		new_path = os.path.join(new_path, audiofile.tag.artist)
@@ -63,11 +69,13 @@ def move_to_correct_path(root,file_name):
 		os.makedirs(new_path)
 
 	new_path = os.path.join(new_path.encode('utf8'), remove_banned_words(file_name))
+	if (file_name_with_path==new_path):
+		return -1
 
 	if args.test:
 		print file_name_with_path+" -> "+new_path
 	else:
-		shutil.move(file_name_with_path, new_path)
+		shutil.move((file_name_with_path==new_path), new_path)
 		if args.verbose:
 			print "Moved "+file_name+" to "+new_path
 
@@ -76,17 +84,14 @@ def move_to_correct_path(root,file_name):
 ## The Main function
 if __name__ == '__main__':
 	# Create a argument parser
-	parser = argparse.ArgumentParser(description='Organize MP3 using ID3 tags.')
+	parser = argparse.ArgumentParser(description='Empytree organizes MP3s using ID3 tags.')
+
 	## Hint: add_argument(name or flags...[, action][, nargs][, const][, default][, type][, choices][, required][, help][, metavar][, dest])
 	parser.add_argument('--verbose','-v',action='store_true')
 	parser.add_argument('--test','-t',action='store_true')
-	parser.parse_args('--verbose --test'.split())
-
-	parser.add_argument('--input','-i',default='',help='The input directory (i.e. where the files you want )',action='store')
-	parser.add_argument('--output','-o',default='Music/',help='The input directory (i.e. where the files you want )',action='store')
+	parser.add_argument('--input','-i',default='',help='The input directory (i.e. where the files you want to organize).',action='store')
+	parser.add_argument('--output','-o',default='Music/',help='The output directory (i.e. where you want to move your files).',action='store')
 	parser.add_argument('--config','-c',default='config.json',help='Location of the config.json file',action='store')
-
-	# parser.add_argument('--max_depth','-d',default=10,help='The maximum depth Empytree will search for mp3s in your input folder.')
 
 	args = parser.parse_args()
 
@@ -105,10 +110,10 @@ if __name__ == '__main__':
 		global data, levels
 		data = json.load(json_data)
 		levels = len(data["TreeFormat"])
-		# pprint(data)
+		pprint(data)
 		json_data.close()
 	except:
-		print "Could not use config: '"+args.config+"'. Either the config was not found or not valid. Using default options."
+		warnings.warn("Could not use config: '"+args.config+"'. Either the config was not found or not valid. Using default options.", Warning)
 
 	# Print out which arguments are defined as what
 	if args.verbose:

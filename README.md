@@ -19,12 +19,12 @@ Clementine
 * Step 2: Change the configuration file, config.json, to your liking (more info below).
 * Step 3 (optional): Run Empytree in test mode
 
-	python empytree.py --test
+	$ python empytree.py --test
 
 It will display which files empytree would hypothetically move and where it would move them. Repeat step 2 if you're unhappy with the results.
 * Step 4: Run Empytree!
 
-	python empytree.py
+	$ python empytree.py
 
 ### Configuration
 By default Empytree will read the configuration file named 'config.json' in the same directory. If you want to use a different configuration file you can pass in a '--config /path/to/config/config_name.json' argument. This escpecially useful if you want to use multiple configuration files.
