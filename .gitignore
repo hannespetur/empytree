@@ -59,6 +59,7 @@ eyed3/
 # test folders
 Music/
 trash/
+test/
 
 # ignore all mp3 files
 *.mp3

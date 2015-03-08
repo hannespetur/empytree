@@ -1,24 +1,88 @@
 {
 	"Folders":
+	{
+		"input":
+		[
+			"/media/sennap/Klari/Music/J/"
+		],
+		"output": "/media/sennap/Klari"
+	},
+	"ArtistFormat":
 	[{
-		"input": "./test",
-		"output": "./Music"
-	}],
-	"TreeFormat":
-	[{
-		"format": "$ARTIST",
+		"format": "Music",
 		"lowercase": false,
 		"uppercase": false,
 		"replaceSpaces": false
 	},{
-		"format": "[$YEAR] $ALBUM",
+		"format": "%(artist_first_letter)s",
 		"lowercase": false,
 		"uppercase": false,
 		"replaceSpaces": false
 	},{
-		"format": "$DISK_NUM$TRACK_NUM-$ARTIST-$TRACK_TITLE",
+		"format": "%(artist_append_the)s",
+		"lowercase": false,
+		"uppercase": false,
+		"replaceSpaces": false
+	},{
+		"format": "[%(year)s] %(album)s",
+		"lowercase": false,
+		"uppercase": false,
+		"replaceSpaces": false
+	},{
+		"format": "%(disc_num)s%(track_num_2)s-%(artist)s-%(title)s",
 		"lowercase": true,
 		"uppercase": false,
 		"replaceSpaces": true
-	}]
+	}],
+	"VAFormat":
+	[{
+		"format": "VA",
+		"lowercase": false,
+		"uppercase": false,
+		"replaceSpaces": false
+	},{
+		"format": "%(album)s",
+		"lowercase": false,
+		"uppercase": false,
+		"replaceSpaces": false
+	},{
+		"format": "%(disc_num)s%(track_num_2)s-%(artist)s-%(title)s",
+		"lowercase": true,
+		"uppercase": false,
+		"replaceSpaces": true
+	}],
+	"ReplaceCharacters":
+	{
+		"!!!": "Three exclamation marks",
+		":": "",
+		"†": "Cross",
+		"♥": "Heart",
+		"&": "and",
+		"Á": "A",
+		"Å": "A",
+		"Ä": "A",
+		"Ð": "D",
+		"É": "E",
+		"Í": "I",
+		"Ó": "O",
+		"Ú": "U",
+		"Ý": "Y",
+		"Þ": "TH",
+		"Æ": "AE",
+		"Ø": "O",
+		"Ö": "O",
+		"á": "a",
+		"å": "a",
+		"ð": "d",
+		"é": "e",
+		"í": "i",
+		"ó": "o",
+		"ú": "u",
+		"ý": "y",
+		"þ": "th",
+		"æ": "ae",
+		"ö": "o",
+		"ø": "o",
+		"ë": "e"
+	}
 }

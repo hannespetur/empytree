@@ -1,7 +1,7 @@
 # empytree
 Empytree is a cross-platform MP3 music organizer. The goal of the project is to create a command line tool to keep music databases well organized. The tool is built so it can easily be used 
 
-**Note:** It's currently in development and non-functional at the moment.
+**Note:** The project is currently in alpha at the moment. Make sure you verify everything using the `--test` argument before using the tool.
 
 ## Prerequisites
 Uses a python module called [eyeD3](http://eyed3.nicfit.net/). You can install it on Ubuntu with the following:
