@@ -24,15 +24,34 @@ def make_file_name_valid(file_name):
 	valid_chars = "-_.,()[] %s%s" % (string.ascii_letters, string.digits)
 	return ''.join(c for c in file_name if c in valid_chars)
 
-## Search for mp3s in spevified input folder
+## Search for mp3s in the specified input folder in the JSON config
 def search_for_mp3s():
 	for inputDir in args.input:
 		for root, _, filenames in os.walk(inputDir):
 			if args.verbose:
-				print "========================================"+root+": "+', '.join(filenames)+"========================================"
+				try:
+					print "========================================"+root+": "+', '.join(filenames)+"========================================"
+				except:
+					pass
 			for filename in filenames:
-				if fnmatch.fnmatch(filename, '*.mp3') or fnmatch.fnmatch(filename, '*.MP3') or fnmatch.fnmatch(filename, '*.Mp3') or fnmatch.fnmatch(filename, '*.mP3'):
+				if fnmatch.fnmatch(filename.lower(),'*.mp3'):
 					yield root, filename
+
+def move_non_mp3s(old_path,new_path):
+	if (old_path==new_path):
+		return True
+	print "==Moving all non-mp3s=="
+	for root, _, filenames in os.walk(old_path):
+		# if args.verbose:
+		# 	try:
+		# 		print "========================================"+root+": "+', '.join(filenames)+"========================================"
+		# 	except:
+		# 		pass
+		for filename in filenames:
+			if not fnmatch.fnmatch(filename.lower(),'*.mp3'):
+				print root, filename,"should be moved to",new_path
+				# yield root, filename
+	return True
 
 def artist_or_va(artist,album_artist):
 	if (artist == album_artist):
@@ -40,48 +59,72 @@ def artist_or_va(artist,album_artist):
 	else:
 		return "VA"
 
-def move_to_correct_path(root,file_name):
-	file_name_with_path = os.path.join(root,file_name)
-	try:
-		audiofile = eyed3.load(file_name_with_path)
-	except:
-		warnings.warn("Error reading file with root: "+root+". Skipping file.", Warning)
-		return -1
-
-	new_path = args.output
-	if not audiofile or not audiofile.tag:
-		warnings.warn("No tag found in file with root: "+root+". Skipping file.", Warning)
-		return -1
-
-	artist = audiofile.tag.artist
-	if (artist is None) or (len(artist) == 0):
+def validate_id3_tags(tag):
+	if not tag:
+		return False
+	
+	if (tag.artist is None) or (len(tag.artist) == 0):
 		try:
 			warnings.warn("Could not find artist tag. Skipping file: "+file_name_with_path, Warning)
 		except:
 			pass
+		return False
+	
+	if (tag.album is None) or (len(tag.album) == 0):
+		try:
+			warnings.warn("Could not find album tag. Skipping file: "+file_name_with_path, Warning)
+		except:
+			pass
+		return False
+	
+	if (tag.title is None) or (len(tag.title) == 0):
+		try:
+			warnings.warn("Could not find title tag. Skipping file: "+file_name_with_path, Warning)
+		except:
+			pass
+		return False
+	
+	if (tag.track_num is None) or (len(tag.track_num) == 0):
+		try:
+			warnings.warn("Could not find track number tag. Skipping file: "+file_name_with_path, Warning)
+		except:
+			pass
+		return False
+	
+	return True
+
+def move_to_correct_path(root,file_name):
+	# Join the paths together
+	file_name_with_path = os.path.join(root,file_name)
+
+	# Let's try to read the file
+	try:
+		audiofile = eyed3.load(file_name_with_path)
+		if not audiofile:
+			raise Exception("No audiofile read.")
+	except:
+		warnings.warn("Error reading file with root: "+root+". Skipping file.", Warning)
 		return -1
 
+	# Check if the tags are valid
+	if not validate_id3_tags(audiofile.tag):
+		return -1
+	
+	artist = audiofile.tag.artist
 	artist_no_the = audiofile.tag.artist if not audiofile.tag.artist.lower().startswith('the ') else audiofile.tag.artist[4:]
 	artist_append_the = audiofile.tag.artist if not audiofile.tag.artist.lower().startswith('the ') else audiofile.tag.artist[4:]+", The"
 	artist_first_letter = artist_no_the[0] if artist_no_the[0] not in ["0","1","2","3","4","5","6","7","8","9","!"] else "0-9"
 	album_artist = audiofile.tag.album_artist
 	artist_or_va = artist if artist == album_artist else "VA"
-	
 	album = audiofile.tag.album
-	if (album is None) or (len(album) == 0):
-		return -1
-	# date = audiofile.tag.release_date.encode('utf8')
 	disc_num = str(audiofile.tag.disc_num[0]) if audiofile.tag.disc_num[0] is not None else ""
 	disc_num_2 = str(audiofile.tag.disc_num[0]).zfill(2) if audiofile.tag.disc_num[0] is not None else ""
 	title = audiofile.tag.title
-	if (title is None) or (len(title) == 0):
-		return -1
 	track_num = str(audiofile.tag.track_num[0]) if audiofile.tag.track_num[0] is not None else ""
-	if (track_num is None) or (len(track_num) == 0):
-		return -1
 	track_num_2 = track_num.zfill(2)
 	year = str(audiofile.tag.getBestDate())[0:4]
 
+	new_path = args.output
 	formatToUse = "ArtistFormat" if artist == album_artist else "VAFormat"
 
 	for level,L in enumerate(data[formatToUse]):
@@ -91,17 +134,23 @@ def move_to_correct_path(root,file_name):
 		Lrs = L["replaceSpaces"]
 
 		if Llc and not Luc:
+			# Change to lowercase
 			Lformat = Lformat.lower()
-		if Luc and not Llc:
+		elif Luc and not Llc:
+			# Change to uppercase
 			Lformat = Lformat.upper()
+		
 		if Lrs:
 			Lformat = Lformat.replace(' ','_')
 		
+		# Replace characters specified in the JSON
 		for key, value in data["ReplaceCharacters"].iteritems():
 			Lformat = Lformat.replace(key,value)
 		
 		if level == (len(data[formatToUse])-1):
+			new_root = new_path
 			Lformat += '.mp3'
+			# Create the directories we need if we're not in test mode
 			if not args.test:
 				if not os.path.exists(new_path):
 					os.makedirs(new_path)
@@ -110,6 +159,9 @@ def move_to_correct_path(root,file_name):
 
 		new_path = os.path.join(new_path,Lformat)
 	
+	# Move all non mp3s
+	move_non_mp3s(root,new_root)
+
 	# No need to move the files if the path is the same as before
 	if (file_name_with_path==new_path):
 		if args.verbose:
@@ -136,6 +188,7 @@ def move_to_correct_path(root,file_name):
 
 		## TODO: Send all other files in the previous folder with the other files
 		## TODO: Delete the previous folder(s) (if it's empty?)
+		## TODO: Change the tags (e.g. make first letter capital)
 
 	return 0
 
@@ -167,16 +220,6 @@ if __name__ == '__main__':
 	# 	warnings.warn("Could not use config: '"+args.config+"'. Either the config was not found or not valid. Using default options.", Warning)
 	# 	print sys.exc_info()[0]
 
-	# Format the args to a standard format
-	# if not args.input.endswith('/'):
-	# 	args.input += '/'
-	# if not args.output.endswith('/'):
-	# 	args.output += '/'
-	# if args.input.startswith('./'):
-	# 	args.input = args.input[2:]
-	# if args.output.startswith('./'):
-	# 	args.output = args.output[2:]
-
 	# args.input = unicode(args.input)
 	args.output = unicode(args.output)
 
@@ -192,8 +235,11 @@ if __name__ == '__main__':
 
 	files_moved = 0
 	for root,mp3file in search_for_mp3s():
-		if args.verbose:
-			print "Trying to move file "+mp3file
+		try:
+			if args.verbose:
+				print "Trying to move file "+mp3file
+		except:
+			pass
 		if not move_to_correct_path(root,mp3file):
 			files_moved += 1
 

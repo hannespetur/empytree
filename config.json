@@ -3,7 +3,7 @@
 	{
 		"input":
 		[
-			"/media/sennap/Klari/Music/J/"
+			"/media/sennap/Klari/Music/J/Justin Timberlake"
 		],
 		"output": "/media/sennap/Klari"
 	},
@@ -54,6 +54,7 @@
 	"ReplaceCharacters":
 	{
 		"!!!": "Three exclamation marks",
+		"...": "",
 		":": "",
 		"†": "Cross",
 		"♥": "Heart",
@@ -84,5 +85,9 @@
 		"ö": "o",
 		"ø": "o",
 		"ë": "e"
+	},
+	"Settings":
+	{
+		"fix_empty_album_artist": true
 	}
 }
