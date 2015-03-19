@@ -54,7 +54,7 @@
 	"ReplaceCharacters":
 	{
 		"!!!": "Three exclamation marks",
-		"...": "",
+		".": "",
 		":": "",
 		"†": "Cross",
 		"♥": "Heart",
