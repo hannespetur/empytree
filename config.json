@@ -3,7 +3,7 @@
 	{
 		"input":
 		[
-			"/media/sennap/Klari/Music/J/Justin Timberlake"
+			"/media/sennap/Klari/Music/J"
 		],
 		"output": "/media/sennap/Klari"
 	},
@@ -54,8 +54,6 @@
 	"ReplaceCharacters":
 	{
 		"!!!": "Three exclamation marks",
-		".": "",
-		":": "",
 		"†": "Cross",
 		"♥": "Heart",
 		"&": "and",

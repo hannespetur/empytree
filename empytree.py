@@ -22,7 +22,7 @@ eyed3.log.setLevel("ERROR") 	## Avoid getting tons of warnings, turn off if you 
 
 
 def make_file_name_valid(file_name):
-	valid_chars = "-_.,()[] %s%s" % (string.ascii_letters, string.digits)
+	valid_chars = "-_,()[] %s%s" % (string.ascii_letters, string.digits)
 	return ''.join(c for c in file_name if c in valid_chars)
 
 
@@ -32,7 +32,7 @@ def search_for_mp3s():
 		for root, _, filenames in os.walk(inputDir):
 			if args.verbose:
 				try:
-					print "========================================"+root+": "+', '.join(filenames)+"========================================"
+					print "========================================"+root+": "+' '.join(filenames)+"========================================"
 				except:
 					pass
 			for filename in filenames:
@@ -40,8 +40,8 @@ def search_for_mp3s():
 					yield root, filename
 
 
+# Old function, not used anymore
 def move_non_mp3s(old_path,new_path):
-	# Old function, not used anymore
 	if (old_path==new_path):
 		return True
 	print "==Moving all non-mp3s=="
@@ -52,14 +52,20 @@ def move_non_mp3s(old_path,new_path):
 				# yield root, filename
 	return True
 
-
+## Usage:  s = artist_or_va(artist,album_artist)
+## Before: artist is a string with the artist from the ID3 tag, album_artist
+##         is the album artist from the ID3 tag.
+## After:  If the two strings match or album artist is empty string, return 
+##         the artist, otherwise return the string "VA"
 def artist_or_va(artist,album_artist):
-	if (artist == album_artist):
+	if (artist == album_artist or album_artist == "" or album_artist == None):
 		return artist
 	else:
 		return "VA"
 
-
+## Usage:  b = validate_id3_tags(tag)
+## Before: Tag is a valid ID3 tag or False
+## After:  Return True if the tag is valid, else return False.
 def validate_id3_tags(tag):
 	if not tag:
 		return False
@@ -94,8 +100,10 @@ def validate_id3_tags(tag):
 	
 	return True
 
-
-def get_new_root_and_file_name(tag):
+## Usage:  new_file_name, new_root = getNewRootAndFilename(tag)
+## Before: Tag is a valid ID3 tag or False
+## After:  new_file_name is a new file name created from the ID3 tags and new_root is the new root.
+def getNewRootAndFilename(tag):
 	if tag == False:
 		return False
 
@@ -112,7 +120,7 @@ def get_new_root_and_file_name(tag):
 	track_num = str(tag.track_num[0]) if tag.track_num[0] is not None else ""
 	track_num_2 = track_num.zfill(2)
 	year = str(tag.getBestDate())[0:4]
-	format_to_use = "ArtistFormat" if (artist == album_artist or album_artist == "") else "VAFormat"
+	format_to_use = "ArtistFormat" if (artist == album_artist or album_artist == "" or album_artist == None) else "VAFormat"
 
 	new_path = args.output
 	for level,L in enumerate(data[format_to_use]):
@@ -153,7 +161,7 @@ def get_new_root_and_file_name(tag):
 	return new_file_name, new_root
 
 
-## Usage:  get_tag(file_name_with_path)
+## Usage:  tag = getTag(file_name_with_path)
 ## Before: Full path to a file to get ID3 tag from.
 ## After:  If the file can be successfully read, return the tag for the file,
 ##         otherwise return False.
@@ -190,7 +198,8 @@ def move_to_correct_path(root,file_name):
 	global d
 	# Join the paths together
 	file_name_with_path = os.path.join(root,file_name)
-	new_path, new_root = get_new_root_and_file_name(getTag(file_name_with_path))
+	new_file_name, new_root = getNewRootAndFilename(getTag(file_name_with_path))
+	new_path = os.path.join(new_root,new_file_name)
 	
 	if new_path == False:
 		return 1
@@ -202,13 +211,7 @@ def move_to_correct_path(root,file_name):
 		return 1
 
 	if root != new_root:
-		# If didn't change we dont have to do anything here
-		print "Root has changed", root, new_root
-		print "Is root in d?", root in d
-		
-		if root in d:
-			print "d[root] =", d[root]
-		
+		# If didn't change we dont have to do anything here	
 		if root not in d:
 			# The folder is not in the dictionary, let's add it
 			print "Case 1: root not in d"
@@ -221,25 +224,29 @@ def move_to_correct_path(root,file_name):
 			print "Case 2: d[root] not the same as new_root"
 			d[root] = False
 
+	# Change file name
+	old_file_name_path = os.path.join(root,file_name)
+	new_file_name_path = os.path.join(root,new_file_name)
 	if args.test:
-		try:
-			print file_name,
-		except:
-			# This happens if python can't convert the unicode string to the output.
-			print "???",
-		print '->',
-		try:
-			print new_path
-		except:
-			# This happens if python can't convert the unicode string to the output.
-			print "???"
+		if old_file_name_path != new_file_name_path:
+			try:
+				print file_name,
+			except:
+				# This happens if python can't convert the unicode string to the output.
+				print "???",
+			print '->',
+			try:
+				print new_file_name
+			except:
+				# This happens if python can't convert the unicode string to the output.
+				print "???"
 	else:
 		if args.verbose:
-			print file_name_with_path, new_path
+			print file_name_with_path, new_file_name_path
 
-		shutil.move(file_name_with_path, new_path)
+		shutil.move(old_file_name_path, new_file_name_path)
 		if args.verbose:
-			print "Moved "+file_name+" to "+new_path
+			print "Moved "+old_file_name_path+" to "+new_file_name_path
 
 		## TODO: Send all other files in the previous folder with the other files
 		## TODO: Delete the previous folder(s) (if it's empty?)
@@ -300,5 +307,21 @@ if __name__ == '__main__':
 	if args.verbose:
 		print "Empytree finished successfully! Total files moved:",files_moved
 
-	if args.verbose:
-		print d
+	for key, value in d.iteritems():
+		if args.test:
+			try:
+				print key
+			except:
+				print "???"
+			print "->"
+			try:
+				print value
+			except:
+				print "???"
+			print "======================"
+		else:
+			if args.verbose:
+				print key, value
+
+			if value != False:
+				shutil.move(key, value)
