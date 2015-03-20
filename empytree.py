@@ -94,13 +94,13 @@ def getNewRootAndFilename(tag):
 	if tag == False:
 		return False
 
+	album = tag.album
+	album_artist = tag.album_artist
 	artist = tag.artist
-	artist_no_the = tag.artist if not tag.artist.lower().startswith('the ') else tag.artist[4:]
 	artist_append_the = tag.artist if not tag.artist.lower().startswith('the ') else tag.artist[4:]+", The"
 	artist_first_letter = artist_no_the[0] if artist_no_the[0] not in ["0","1","2","3","4","5","6","7","8","9","!"] else "0-9"
-	album_artist = tag.album_artist
+	artist_no_the = tag.artist if not tag.artist.lower().startswith('the ') else tag.artist[4:]
 	artist_or_va = artist if artist == album_artist else "VA"
-	album = tag.album
 	disc_num = str(tag.disc_num[0]) if tag.disc_num[0] is not None else ""
 	disc_num_2 = str(tag.disc_num[0]).zfill(2) if tag.disc_num[0] is not None else ""
 	title = tag.title
