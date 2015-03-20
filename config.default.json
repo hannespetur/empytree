@@ -3,18 +3,14 @@
 	{
 		"input":
 		[
-			"/home/sennap/git/empytree/Download"
+			"UNIX FORMAT: /folder/to/scan/",
+			"WINDOWS FORMAT: C://folder//to//scan" 
 		],
-		"output": "/home/sennap/git/empytree/Download/"
+		"output": "/folder/to/put/music/in (UNIX)"
 	},
 	"ArtistFormat":
 	[{
 		"format": "Music",
-		"lowercase": false,
-		"uppercase": false,
-		"replaceSpaces": false
-	},{
-		"format": "%(artist_first_letter)s",
 		"lowercase": false,
 		"uppercase": false,
 		"replaceSpaces": false

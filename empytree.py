@@ -6,7 +6,7 @@ import re 						## Regular expressium operations
 import sys  					## System-specific parameters and functions
 from glob import glob			## Unix style pathname pattern expansion
 import fnmatch					## Matches file names
-import shutil					##00
+import shutil					## Used for moving files
 import argparse					## Argument parser
 import warnings					##
 import json						## json is used for reading the config
@@ -32,25 +32,12 @@ def search_for_mp3s():
 		for root, _, filenames in os.walk(inputDir):
 			if args.verbose:
 				try:
-					print "========================================"+root+": "+' '.join(filenames)+"========================================"
+					print "\n===== "+root+": "+' '.join(filenames)+" ====="
 				except:
 					pass
 			for filename in filenames:
 				if fnmatch.fnmatch(filename.lower(),'*.mp3'):
 					yield root, filename
-
-
-# Old function, not used anymore
-def move_non_mp3s(old_path,new_path):
-	if (old_path==new_path):
-		return True
-	print "==Moving all non-mp3s=="
-	for root, _, filenames in os.walk(old_path):
-		for filename in filenames:
-			if not fnmatch.fnmatch(filename.lower(),'*.mp3'):
-				print root, filename,"should be moved to",new_path
-				# yield root, filename
-	return True
 
 ## Usage:  s = artist_or_va(artist,album_artist)
 ## Before: artist is a string with the artist from the ID3 tag, album_artist
@@ -119,7 +106,7 @@ def getNewRootAndFilename(tag):
 	title = tag.title
 	track_num = str(tag.track_num[0]) if tag.track_num[0] is not None else ""
 	track_num_2 = track_num.zfill(2)
-	year = str(tag.getBestDate())[0:4]
+	year = str(tag.getBestDate())[0:4] if tag.getBestDate() is not None else "0000"
 	format_to_use = "ArtistFormat" if (artist == album_artist or album_artist == "" or album_artist == None) else "VAFormat"
 
 	new_path = args.output
@@ -149,10 +136,6 @@ def getNewRootAndFilename(tag):
 		if level == file_name_level:
 			new_root = new_path
 			Lformat += '.mp3'
-			# Create the directories we need if we're not in test mode
-			if not args.test:
-				if not os.path.exists(new_path):
-					os.makedirs(new_path)
 			new_file_name = Lformat
 			return new_file_name, new_root
 
@@ -195,7 +178,7 @@ def getTag(file_name_with_path):
 ##         file in the root folder.
 ## After:  Return 1 if the file was not moved and 0 if it was successfully moved.
 def move_to_correct_path(root,file_name):
-	global d
+	global d, mismatch
 	# Join the paths together
 	file_name_with_path = os.path.join(root,file_name)
 	new_file_name, new_root = getNewRootAndFilename(getTag(file_name_with_path))
@@ -214,44 +197,57 @@ def move_to_correct_path(root,file_name):
 		# If didn't change we dont have to do anything here	
 		if root not in d:
 			# The folder is not in the dictionary, let's add it
-			print "Case 1: root not in d"
+
 			if root in d:
 				print d[root]
 			d[root] = new_root
 		elif d[root] != new_root:
 			# Some other file in the folder disagrees which folder they should move to,
 			# therefore we decide to not move the folder
-			print "Case 2: d[root] not the same as new_root"
+			if args.verbose:
+				print "Case 2: d[root] not the same as new_root"
+			if root not in mismatch:
+				mismatch[root] = []
+			if d[root] not in mismatch[root] and d[root] != False:
+				mismatch[root].append(d[root])
+			if new_root not in mismatch[root]:
+				mismatch[root].append(new_root)
+			if args.verbose:
+				print "WARNING:",d[root],"and",new_root
 			d[root] = False
 
 	# Change file name
 	old_file_name_path = os.path.join(root,file_name)
 	new_file_name_path = os.path.join(root,new_file_name)
-	if args.test:
-		if old_file_name_path != new_file_name_path:
-			try:
-				print file_name,
-			except:
-				# This happens if python can't convert the unicode string to the output.
-				print "???",
-			print '->',
-			try:
-				print new_file_name
-			except:
-				# This happens if python can't convert the unicode string to the output.
-				print "???"
+	if old_file_name_path != new_file_name_path:
+		if args.mode == "test":
+				try:
+					print file_name,
+				except:
+					# This happens if python can't convert the unicode string to the output.
+					print "???",
+				print '->',
+				try:
+					print new_file_name
+				except:
+					# This happens if python can't convert the unicode string to the output.
+					print "???"
+		else:
+			if args.verbose:
+				try:
+					print file_name+' -> '+new_file_name
+				except:
+					pass
+
+			shutil.move(old_file_name_path, new_file_name_path)
+			if args.verbose:
+				print "Moved "+old_file_name_path+" to "+new_file_name_path
 	else:
-		if args.verbose:
-			print file_name_with_path, new_file_name_path
+		return 1
 
-		shutil.move(old_file_name_path, new_file_name_path)
-		if args.verbose:
-			print "Moved "+old_file_name_path+" to "+new_file_name_path
-
-		## TODO: Send all other files in the previous folder with the other files
-		## TODO: Delete the previous folder(s) (if it's empty?)
-		## TODO: Change the tags (e.g. make first letter capital)
-
+			## TODO: Send all other files in the previous folder with the other files
+			## TODO: Delete the previous folder(s) (if it's empty?)
+			## TODO: Change the tags (e.g. make first letter capital)
 	return 0
 
 
@@ -262,7 +258,7 @@ if __name__ == '__main__':
 
 	## Hint: add_argument(name or flags...[, action][, nargs][, const][, default][, type][, choices][, required][, help][, metavar][, dest])
 	parser.add_argument('--verbose','-v',action='store_true')
-	parser.add_argument('--test','-t',action='store_true')
+	parser.add_argument('--mode','-m',default='test',action='store', choices=['test','organize','deluge'])
 	parser.add_argument('--config','-c',default='config.json',help='Location of the config.json file',action='store')
 
 	args = parser.parse_args()
@@ -288,40 +284,79 @@ if __name__ == '__main__':
 		print "Empytree starting..."
 		print "========= Arguments ========="
 		print "Verbosity is on!"
-		print "Running on test mode?",args.test
+		print "Running on test mode?",args.mode == "test"
 		# print "Input directory is: "+args.input
 		print "Output directory is: "+args.output
 		print "============================="
 
 	d = {}
-	files_moved = 0
+	mismatch = {}
+
+	file_names_changes = 0
 	for root,mp3file in search_for_mp3s():
 		# try:
 		# 	if args.verbose:
 		# 		print "Trying to move file "+mp3file
 		# except:
 		# 	pass
-		if not move_to_correct_path(root,mp3file):
-			files_moved += 1
+		if move_to_correct_path(root,mp3file) == 0:
+			file_names_changes += 1
 
-	if args.verbose:
-		print "Empytree finished successfully! Total files moved:",files_moved
-
+	print "\n======================"
+	folders_moved = 0
 	for key, value in d.iteritems():
-		if args.test:
-			try:
-				print key
-			except:
-				print "???"
-			print "->"
-			try:
-				print value
-			except:
-				print "???"
-			print "======================"
+		if args.mode == "test":
+			if value != False:
+				try:
+					print key
+				except:
+					print "???"
+				print "->"
+				try:
+					print value
+				except:
+					print "???"
+				print "======================"
+				folders_moved += 1
+			else:
+				print "Some of the files in "+key+"wanted to go to different folders:"
+				for location in mismatch[key]:
+					print location
+				print "The directory was not moved. Please fix the ID3 tags and/or the folder format to make sure it's organized correctly!"
+				print "======================"
 		else:
 			if args.verbose:
 				print key, value
 
 			if value != False:
-				shutil.move(key, value)
+				try:
+					shutil.move(key, value)
+				except shutil.Error:
+					print "ERROR: Folder '"+value+"' already exists. Folder will not be moved from "+key
+				folders_moved += 1
+			else:
+				print "Some of the files in "+key+" wanted to go to different folders:"
+				for location in mismatch[key]:
+					print location
+				print "The directory was not moved. Please fix the ID3 tags and/or the folder format to make sure it's organized correctly!"
+				print "======================"
+	
+	if args.mode != "test" and data["Settings"]["remove_empty_directories"]:
+		for key in d:
+			stop_checking = False
+			while not stop_checking:
+				for curdir, subdirs, files in os.walk(key):
+					if len(subdirs) == 0 and len(files) == 0: #check for empty directories. len(files) == 0 may be overkill
+						if args.verbose:
+							print 'Removing empty directory: '+curdir #add empty results to file
+						os.rmdir(curdir) #delete the directory
+					else:
+						stop_checking = True
+						break
+				(key, _) = os.path.split(key)
+
+
+	if args.verbose:
+		print "Empytree finished successfully!"
+		print "  Filenames changed:",file_names_changes
+		print "  Folders moved:", folders_moved
