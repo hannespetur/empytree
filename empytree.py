@@ -59,28 +59,30 @@ def validate_id3_tags(tag):
 	
 	if (tag.artist is None) or (len(tag.artist) == 0):
 		try:
-			warnings.warn("Could not find artist tag. Skipping file: "+file_name_with_path, Warning)
+			print "Could not find artist tag. Skipping file."
 		except:
 			pass
 		return False
 	
 	if (tag.album is None) or (len(tag.album) == 0):
+		if args.verbose:
+			print "Case 3"
 		try:
-			warnings.warn("Could not find album tag. Skipping file: "+file_name_with_path, Warning)
+			print "Could not find album tag. Skipping file."
 		except:
 			pass
 		return False
 	
 	if (tag.title is None) or (len(tag.title) == 0):
 		try:
-			warnings.warn("Could not find title tag. Skipping file: "+file_name_with_path, Warning)
+			print "Could not find title tag. Skipping file."
 		except:
 			pass
 		return False
 	
 	if (tag.track_num is None) or (len(tag.track_num) == 0):
 		try:
-			warnings.warn("Could not find track number tag. Skipping file: "+file_name_with_path, Warning)
+			print "Could not find track number tag. Skipping file."
 		except:
 			pass
 		return False
@@ -91,15 +93,19 @@ def validate_id3_tags(tag):
 ## Before: Tag is a valid ID3 tag or False
 ## After:  new_file_name is a new file name created from the ID3 tags and new_root is the new root.
 def getNewRootAndFilename(tag):
-	if tag == False:
-		return False
+	if tag == False or tag == None or not validate_id3_tags(tag):
+		if tag == False:
+			print "Invalid tag"
+		elif tag == None:
+			print "Tag is None"
+		return False, False
 
 	album = tag.album
 	album_artist = tag.album_artist
 	artist = tag.artist
 	artist_append_the = tag.artist if not tag.artist.lower().startswith('the ') else tag.artist[4:]+", The"
-	artist_first_letter = artist_no_the[0] if artist_no_the[0] not in ["0","1","2","3","4","5","6","7","8","9","!"] else "0-9"
 	artist_no_the = tag.artist if not tag.artist.lower().startswith('the ') else tag.artist[4:]
+	artist_first_letter = artist_no_the[0] if artist_no_the[0] not in ["0","1","2","3","4","5","6","7","8","9","!"] else "0-9"
 	artist_or_va = artist if artist == album_artist else "VA"
 	disc_num = str(tag.disc_num[0]) if tag.disc_num[0] is not None else ""
 	disc_num_2 = str(tag.disc_num[0]).zfill(2) if tag.disc_num[0] is not None else ""
@@ -157,7 +163,7 @@ def getTag(file_name_with_path):
 		return audiofile.tag
 	except:
 		try:
-			warnings.warn("Error reading file with filename: "+file_name+". Skipping file.", Warning)
+			print "Error reading file with filename: "+file_name+". Skipping file."
 		except:
 			pass
 		return False
@@ -165,7 +171,7 @@ def getTag(file_name_with_path):
 	# Check if the tags are valid
 	if not validate_id3_tags(audiofile.tag):
 		try:
-			warnings.warn("Missing tag information from file with filename: "+file_name+". Skipping file.", Warning)
+			print "Missing tag information from file with filename: "+file_name+". Skipping file."
 		except:
 			pass
 		return False
@@ -181,8 +187,15 @@ def move_to_correct_path(root,file_name):
 	global d, mismatch
 	# Join the paths together
 	file_name_with_path = os.path.join(root,file_name)
-	new_file_name, new_root = getNewRootAndFilename(getTag(file_name_with_path))
+	tag = getTag(file_name_with_path)
+	if tag == False:
+		return 1
+
+	new_file_name, new_root = getNewRootAndFilename(tag)
+	if new_file_name == False:
+		return 1
 	new_path = os.path.join(new_root,new_file_name)
+	
 	
 	if new_path == False:
 		return 1
@@ -197,7 +210,6 @@ def move_to_correct_path(root,file_name):
 		# If didn't change we dont have to do anything here	
 		if root not in d:
 			# The folder is not in the dictionary, let's add it
-
 			if root in d:
 				print d[root]
 			d[root] = new_root
