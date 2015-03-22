@@ -50,41 +50,55 @@ def artist_or_va(artist,album_artist):
 	else:
 		return "VA"
 
-## Usage:  b = validate_id3_tags(tag)
+## Usage:  text_titlecased = titlecase(text)
+## Before: text is some string.
+## After:  The same text but titlecased, i.e. every word (except 'the', 'and', etc.)
+##         with the first character uppcased.
+def titlecase(text):
+	banned = ['the','and','a']
+	lst = []
+	for i,word in enumerate(text.split()):
+		if(word not in banned or i == 0):
+			lst.append(word[0].upper()+word[1:])
+		else:
+			lst.append(word)
+	return lst
+
+## Usage:  b = validate_id3_tags(tag,file_name)
 ## Before: Tag is a valid ID3 tag or False
 ## After:  Return True if the tag is valid, else return False.
-def validate_id3_tags(tag):
+def validate_id3_tags(tag,file_name):
 	if not tag:
 		return False
 	
 	if (tag.artist is None) or (len(tag.artist) == 0):
 		try:
-			print "Could not find artist tag. Skipping file."
+			print "Warning: Could not find artist tag in file '"+file_name+"' Skipping file."
 		except:
-			pass
+			print "Warning: Could not find artist tag in file ??? Skipping file."
 		return False
 	
 	if (tag.album is None) or (len(tag.album) == 0):
 		if args.verbose:
 			print "Case 3"
 		try:
-			print "Could not find album tag. Skipping file."
+			print "Warning: Could not find album tag in file '"+file_name+"' Skipping file."
 		except:
-			pass
+			print "Warning: Could not find album tag in file ??? Skipping file."
 		return False
 	
 	if (tag.title is None) or (len(tag.title) == 0):
 		try:
-			print "Could not find title tag. Skipping file."
+			print "Warning: Could not find title tag in file '"+file_name+"' Skipping file."
 		except:
-			pass
+			print "Warning: Could not find title tag in file ??? Skipping file."
 		return False
 	
 	if (tag.track_num is None) or (len(tag.track_num) == 0):
 		try:
-			print "Could not find track number tag. Skipping file."
+			print "Warning: Could not find track number tag in file '"+file_name+"' Skipping file."
 		except:
-			pass
+			print "Warning: Could not find track number tag in file ??? Skipping file."
 		return False
 	
 	return True
@@ -92,12 +106,8 @@ def validate_id3_tags(tag):
 ## Usage:  new_file_name, new_root = getNewRootAndFilename(tag)
 ## Before: Tag is a valid ID3 tag or False
 ## After:  new_file_name is a new file name created from the ID3 tags and new_root is the new root.
-def getNewRootAndFilename(tag):
-	if tag == False or tag == None or not validate_id3_tags(tag):
-		if tag == False:
-			print "Invalid tag"
-		elif tag == None:
-			print "Tag is None"
+def getNewRootAndFilename(tag,file_name):
+	if tag == False or tag == None:
 		return False, False
 
 	album = tag.album
@@ -160,24 +170,19 @@ def getTag(file_name_with_path):
 		audiofile = eyed3.load(file_name_with_path)
 		if not audiofile:
 			raise Exception("No audiofile read.")
-		return audiofile.tag
 	except:
 		try:
-			print "Error reading file with filename: "+file_name+". Skipping file."
+			print "Warning: Error reading file with filename: '"+file_name_with_path+"'. Skipping file."
 		except:
-			pass
+			print "Warning: Error reading file with filename: ??? Skipping file."
 		return False
 
 	# Check if the tags are valid
-	if not validate_id3_tags(audiofile.tag):
-		try:
-			print "Missing tag information from file with filename: "+file_name+". Skipping file."
-		except:
-			pass
+	if not validate_id3_tags(audiofile.tag,file_name_with_path):
 		return False
 
 	# All is good, return the tag
-	return tag
+	return audiofile.tag
 
 ## Usage:  move_to_correct_path(root,file_name)
 ## Before: The root (directory) of the file to be moved, file_name must be a existing
@@ -188,10 +193,10 @@ def move_to_correct_path(root,file_name):
 	# Join the paths together
 	file_name_with_path = os.path.join(root,file_name)
 	tag = getTag(file_name_with_path)
-	if tag == False:
+	if tag == False or tag == None:
 		return 1
 
-	new_file_name, new_root = getNewRootAndFilename(tag)
+	new_file_name, new_root = getNewRootAndFilename(tag,file_name)
 	if new_file_name == False:
 		return 1
 	new_path = os.path.join(new_root,new_file_name)
@@ -333,7 +338,7 @@ if __name__ == '__main__':
 			else:
 				print "Some of the files in "+key+"wanted to go to different folders:"
 				for location in mismatch[key]:
-					print location
+					print "'"+location+"'"
 				print "The directory was not moved. Please fix the ID3 tags and/or the folder format to make sure it's organized correctly!"
 				print "======================"
 		else:
@@ -349,7 +354,7 @@ if __name__ == '__main__':
 			else:
 				print "Some of the files in "+key+" wanted to go to different folders:"
 				for location in mismatch[key]:
-					print location
+					print "'"+location+"'"
 				print "The directory was not moved. Please fix the ID3 tags and/or the folder format to make sure it's organized correctly!"
 				print "======================"
 	
@@ -369,6 +374,11 @@ if __name__ == '__main__':
 
 
 	if args.verbose:
-		print "Empytree finished successfully!"
-		print "  Filenames changed:",file_names_changes
-		print "  Folders moved:", folders_moved
+		if args.mode == 'test':
+			print "Empytree finished successfully in test mode! Run with '--mode organize' to actually change something."
+			print "  Hypothetical filenames changed:",file_names_changes
+			print "  Hypothetical folders moved:", folders_moved
+		else:
+			print "Empytree finished successfully!"
+			print "  Filenames changed:",file_names_changes
+			print "  Folders moved:", folders_moved

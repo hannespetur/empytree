@@ -3,7 +3,7 @@
 	{
 		"input":
 		[
-			"/media/sennap/Klari/Music_old/A"
+			"/media/sennap/Klari/Music_old/"
 		],
 		"output": "/media/sennap/Klari"
 	},
@@ -53,7 +53,7 @@
 	}],
 	"ReplaceCharacters":
 	{
-		"!!!": "Three exclamation marks",
+		"!!!": "3 Exclamation Marks",
 		"†": "Cross",
 		"♥": "Heart",
 		"&": "and",
