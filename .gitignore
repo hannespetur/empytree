@@ -66,3 +66,6 @@ test/
 
 # mac stuff
 .DS_Store
+
+# sublime stuff
+project.sublime*
