@@ -1,6 +1,7 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
+## Internal Python modules
 import re 						## Regular expressium operations
 import sys  					## System-specific parameters and functions
 import os						## Operation system interface
@@ -10,7 +11,11 @@ import shutil					## Used for moving files
 ## Local files
 from common import *
 
-## Search for mp3s in the specified input folder in the JSON config
+
+## Usage:  root, filename = search_for_mp3s(input_dirs,verbose)
+## Before: input_dirs is a list of input directories and verbose is True
+##         if verbose mode is on.
+## After:  root is the root of the file found and filename is its name.
 def search_for_mp3s(input_dirs,verbose):
 	for input_dir in input_dirs:
 		for root, _, filenames in os.walk(input_dir):
@@ -22,17 +27,6 @@ def search_for_mp3s(input_dirs,verbose):
 			for filename in filenames:
 				if fnmatch.fnmatch(filename.lower(),'*.mp3'):
 					yield root, filename
-
-## Usage:  s = artist_or_va(artist,album_artist)
-## Before: artist is a string with the artist from the ID3 tag, album_artist
-##         is the album artist from the ID3 tag.
-## After:  If the two strings match or album artist is empty string, return 
-##         the artist, otherwise return the string "VA"
-def artist_or_va(artist,album_artist):
-	if (artist == album_artist or album_artist == "" or album_artist == None):
-		return artist
-	else:
-		return "VA"
 
 ## Usage:  new_file_name, new_root = getNewRootAndFilename(tag)
 ## Before: Tag is a valid ID3 tag or False
@@ -47,7 +41,7 @@ def getNewRootAndFilename(tag,file_name,args,data):
 	artist_append_the = tag.artist if not tag.artist.lower().startswith('the ') else tag.artist[4:]+", The"
 	artist_no_the = tag.artist if not tag.artist.lower().startswith('the ') else tag.artist[4:]
 	artist_first_letter = artist_no_the[0] if artist_no_the[0] not in ["0","1","2","3","4","5","6","7","8","9","!"] else "0-9"
-	artist_or_va = artist if artist == album_artist else "VA"
+	artist_or_va = artist if (artist == album_artist or album_artist == "" or album_artist == None) else "VA"
 	disc_num = str(tag.disc_num[0]) if tag.disc_num[0] is not None else ""
 	disc_num_2 = str(tag.disc_num[0]).zfill(2) if tag.disc_num[0] is not None else ""
 	title = tag.title
@@ -125,19 +119,17 @@ def rename_files(root,file_name,args,data):
 			if root in d:
 				print d[root]
 			d[root] = new_root
-		elif d[root] != new_root:
+		elif d[root] != new_root and d[root] != False:
 			# Some other file in the folder disagrees which folder they should move to,
 			# therefore we decide to not move the folder
 			if args.verbose:
-				print "Case 2: d[root] not the same as new_root"
+				print "Warning: d[root] not the same as new_root: d[root] =",d[root],"and new_root =",new_root
 			if root not in mismatch:
 				mismatch[root] = []
-			if d[root] not in mismatch[root] and d[root] != False:
+			if d[root] not in mismatch[root]:
 				mismatch[root].append(d[root])
 			if new_root not in mismatch[root]:
 				mismatch[root].append(new_root)
-			if args.verbose:
-				print "WARNING:",d[root],"and",new_root
 			d[root] = False
 
 	# Change file name

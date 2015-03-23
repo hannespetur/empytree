@@ -2,7 +2,9 @@
 import eyed3	## eyed3 id3 tag module: http://eyed3.nicfit.net/
 eyed3.log.setLevel("ERROR") 	## Avoid getting tons of warnings, turn off if you want to debug.
 
+## Internal Python modules
 import string
+
 
 ## Usage:  valid_text = make_file_name_valid(text)
 ## Before: text is a string.
@@ -11,6 +13,7 @@ import string
 def make_file_name_valid(file_name):
 	valid_chars = "-_,()[] %s%s" % (string.ascii_letters, string.digits)
 	return ''.join(c for c in file_name if c in valid_chars)
+
 
 ## Usage:  tag = getTag(file_name_with_path)
 ## Before: Full path to a file to get ID3 tag from.
@@ -35,6 +38,7 @@ def getTag(file_name_with_path):
 
 	# All is good, return the tag
 	return audiofile.tag
+
 
 ## Usage:  b = validate_id3_tags(tag,file_name)
 ## Before: Tag is a valid ID3 tag or False
@@ -71,6 +75,7 @@ def validate_id3_tags(tag,file_name):
 			print "Warning: Could not find track number tag in file ??? Skipping file."
 		return False
 	return True
+
 
 ## Usage:  text_titlecased = titlecase(text)
 ## Before: text is some string.

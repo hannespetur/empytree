@@ -1,9 +1,9 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
+## Internal python modules
 import argparse					## Argument parser
 import json						## json is used for reading the config
-# from pdb import set_trace
 
 ## Local files
 from organizer import *
@@ -19,9 +19,7 @@ if __name__ == '__main__':
 	parser.add_argument('--config','-c',default='config.json',help='Location of the config.json file',action='store')
 
 	args = parser.parse_args()
-	
 	json_data = open(args.config,'r')
-	global data
 	data = json.load(json_data)
 	json_data.close()
 	args.input = data["Folders"]["input"]
@@ -37,4 +35,5 @@ if __name__ == '__main__':
 		print "Output directory is: "+args.output
 		print "============================="
 
-	organize(args,data)
+	if args.mode == "organize" or args.mode == "test":
+		organize(args,data)
