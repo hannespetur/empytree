@@ -3,9 +3,9 @@
 	{
 		"input":
 		[
-			"/media/sennap/Klari/Music_old/"
+			"/home/sennap/git/empytree/test/test2"
 		],
-		"output": "/media/sennap/Klari"
+		"output": "/home/sennap/git/empytree/test/"
 	},
 	"ArtistFormat":
 	[{
