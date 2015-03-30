@@ -1,7 +1,7 @@
 # empytree
 Empytree is a cross-platform MP3 music organizer. The goal of the project is to create a command line tool to keep music databases well organized. The tool is built so it can easily be used in a pipeline with BitTorrent clients.
 
-**Note:** The project is currently in alpha at the moment. Make sure you verify everything is correct using the `--mode test` argument before using the tool. However, if something unexpected happens note that Empytree is does not remove anything except empty directories so no data should ever be lost because of it.
+**Note:** The project is currently ready to use but has very limited features. Make sure you verify everything is correct using the `--mode test` argument before using the tool. However, if something unexpected happens note that Empytree is does not remove anything except empty directories so no data should ever be lost because of it. If you'd like a more advanced tool like empytree, I recommend [beets](https://github.com/sampsyo/beets).
 
 ## Prerequisites
 Uses a python module called [eyeD3](http://eyed3.nicfit.net/). You can install it on Ubuntu with the following:
@@ -71,8 +71,3 @@ The only changable setting is currently: remove_empty_directories. By default it
 * `%(track_num)s`
 * `%(track_num_2)s`: Track number with leading zeros.
 * `%(year)s`
-
-## Todo
-* Create a tagging mode where files can be tagged efficiently.
-* Create a deluge mode to specificly have support for [Deluge](http://deluge-torrent.org/).
-* Create a daemon.
